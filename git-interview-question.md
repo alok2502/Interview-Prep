@@ -1,124 +1,148 @@
+# Git Interview Questions & Answers
+
+## 📘 Basics
+
+**Q: What is the difference between git fork and git clone?**  
+- **git fork**: Creates a copy of a repository on your GitHub (or GitLab, etc.) account—ideal for contributing without write access.  
+- **git clone**: Downloads a local copy of any remote repository to your machine for development.
+
+**Q: Describe a scenario where you used git fork instead of git clone.**  
+In my previous project, I didn’t have write access to the modernization branch. I forked the repo, cloned my fork locally, created a feature branch, made changes, pushed to my fork, and raised a pull request upstream.
+
+## 🔁 Fetch vs Pull
+
+**Q: What is the difference between git fetch and git pull?**  
+- **git fetch**: Downloads new commits into `.git/refs` but does not alter your working directory—useful for reviewing changes first.  
+- **git pull**: Runs fetch + merge (or rebase), updating both metadata and working files in one go.
+
+**Q: Which do you generally prefer, git fetch or git pull?**  
+I prefer git pull because our CI/CD pipeline runs automated checks on each commit. Pulling and merging in one step fits our workflow better.
+
+## 🔀 Merge vs Rebase
+
+**Q: What is the difference between git merge and git rebase?**  
+- **git rebase origin/main**: Replays your commits on top of main, producing a clean, linear history.  
+- **git merge origin/main**: Merges histories and adds a merge commit, preserving the actual sequence of development.
+
+## 🌿 Branching Strategy
+
+**Q: Explain your organization's Git branching strategy.**  
+1. `modernization` is our core development branch.  
+2. Each feature/bug branch stems from it.  
+3. After pull request and review, changes are merged back into `modernization`.  
+4. A release branch is created for QA/testing.  
+5. On deployment success, it goes live; if hotfixes are needed, we branch off release and merge back.
+
+## 💥 Challenges & Problem-Solving
+
+**Q: Share three Git-related challenges faced in your previous organization.**  
+1. No branching strategy – introduced trunk-based development with feature, release, and hotfix branches.  
+2. Lack of access controls – implemented RBAC with roles: Reader, Developer, Reviewer, Maintainer, Admin.  
+3. Unwanted files in the repo – created a shared `.gitignore` and trained the team to exclude lock, config, and secret files.
+
+**Q: Describe a recent Git challenge and how you overcame it.**  
+Everyone could create branches, causing CI pipeline overload. I introduced RBAC to restrict branch creation, significantly cutting costs and improving repo governance.
+
+## ⚠️ Merge Conflicts & Strategies
+
+**Q: How do you resolve merge conflicts?**  
+1. Identify both authors of conflicting changes.  
+2. Discuss resolution with them.  
+3. One developer fixes the conflict and pushes.  
+4. Validate via tests before merging.
+
+**Q: Explain merge strategies: ours vs theirs.**  
+- **ours**: Keeps changes from the current branch, discarding incoming changes.  
+- **theirs**: Prefers incoming branch changes, discarding current branch edits.  
+Useful in bulk override scenarios (e.g., hotfixes, branch syncs).
+
+## 🔖 Tags & Squashing
+
+**Q: Have you used Git tags? If yes, why?**  
+Yes—as part of deployment. Each tagged commit corresponds to a deployed build. Tags help in easy rollbacks and audits.
+
+**Q: How do you combine multiple commits into one?**  
+```bash
+git rebase -i HEAD~10
 ```
-Question : What is the difference between git fork and git clone
-Answer : 	• git fork creates a copy of a repository on your GitHub (or GitLab, etc.) account, letting you propose changes without write access to the original repo.
-	• git clone creates a local copy of any Git repository (your own or someone else’s) on your machine for development.
+Then mark the first commit `pick`, the rest `squash (s)`, save, edit the commit message, then:
+```bash
+git push -f
 ```
 
-```
-Question : Explain me a scenario where you have used git fork instead of git clone
-Answer :  In my previous project, I didn’t have write access to the main modernization branch. So, I forked the repository to my GitHub account, cloned it locally, and created a feature branch. After making changes, I pushed the branch to my fork and raised a pull request to the original modernization branch. This way, I could contribute without direct access to the main repo.
-```
+## 🛠️ Daily Commands
 
-```
-Question :  Git Fetch vs Git Pull
-Answer : Let's say I cloned a repository in my local machine. Meanwhile, other developers pushed their changes to the remote.
-If I run git fetch, it will download those changes from the remote and store them in my local Git repo’s metadata (inside .git/refs) without affecting my working directory. This lets me review the changes before deciding to merge or rebase. On the other hand, git pull is essentially git fetch followed by a merge (or rebase, depending on the config). It updates both your metadata and your working directory in one step.
-```
+**Q: List 10 Git commands you use daily.**  
+1. `git clone`  
+2. `git add`  
+3. `git commit -m "msg"`  
+4. `git pull`  
+5. `git push`  
+6. `git status`  
+7. `git log`  
+8. `git merge`  
+9. `git diff`  
+10. `git stash`  
+*(Bonus: `git checkout` / `git switch`)*
 
-```
-Question : What do you prefer generally git fetch vs git pull
-Answer : I generally prefer git pull over git fetch because, in our organization, commits typically trigger a CI/CD pipeline. This pipeline runs automated checks, including vulnerability scans and other validations, which gives us confidence that the incoming code is safe and ready to merge. Since git pull fetches and integrates the changes in one step, it's more streamlined for our day-to-day development.
-```
+## ⚙️ Internals & Recovery
 
-```
-Question : What is the difference between git merge and git rebase
-Answer : Let me explain the difference between git merge and git rebase with an example. Suppose we have a repository where the main branch has 100 commits. A feature branch is then created from main, and 70 new commits are added to it. Meanwhile, other developers continue working on main, adding another 100 commits. > > Now, if we use git rebase origin/main on the feature branch, Git will reapply the 70 commits from the feature branch on top of the updated 200-commit main history—making the timeline linear and clean. > > On the other hand, if we use git merge origin/main, Git will combine the two histories, preserving the actual sequence of events. So, you'll see the first 100 commits from main, then the 70 feature commits, followed by the new 100 commits from main, along with a merge commit.
-```
+**Q: How do you ignore a file from being pushed?**  
+Add the path (e.g. `.env`) to `.gitignore`.
 
-```
-Question : Explain the git branching strategy that you follow in your organization.
-Answer : In our organization, we follow a structured branching strategy to support continuous development and stable releases. The core branch we use is called modernization, which acts as the base for all feature and bug-fix work. > > Whenever a new feature needs to be implemented or a bug needs fixing, we create a dedicated branch from modernization. Once the development is complete, a pull request is raised. After code review and validations, our team lead merges the changes back into the modernization branch. > > Periodically, once we've accumulated a stable set of changes, we create a release branch from modernization. This branch is handed over to the QA team for testing and validation. If everything checks out, the code is deployed to production. > > If any issues are found in production, a hotfix branch is created from the release branch. After the fix is applied and tested, it’s merged back into both the modernization branch and any other relevant feature branches to keep everything in sync.
+**Q: What is the .git folder used for?**  
+Contains all metadata: history, refs, staging info, config, hooks, object database—Git’s internal state storage.
 
-```
-```
-Question : Explain three challanges that you faced related to git in your previous orgnozation
-Answer : > 1. Lack of a Branching Strategy > When I joined the organization, there was no structured Git branching strategy. I introduced a custom version of trunk-based development to streamline our workflow. We designated a main branch for continuous development. For every new feature or bug, a separate branch was created from main, and after completion, merged back via pull requests. Once features were ready for release, we’d create a release branch from main for QA testing. If everything passed QA, the feature would be deployed to production. In case of production issues, we’d create a hotfix branch, then merge the fix into both main and the release branches to maintain consistency.
+**Q: Can you restore a deleted .git folder?**  
+Yes—by restoring from backup or recloning the repository. Any unpushed local commits will be lost.
 
-> 2. No Access Controls in Place > Initially, our Git repositories lacked proper access control. I helped implement RBAC (Role-Based Access Control) by introducing structured roles such as Admin, Reviewer, Maintainer, and Developer. We also enforced policies—for instance, only DevOps engineers could create branches, and only Reviewers could be assigned to approve pull requests. This brought order, improved security, and reduced the chances of unauthorized changes.
+## 🔐 Security & Sensitive Files
 
-> 3. Unnecessary Files Being Committed > I noticed that some developers were pushing unwanted files to version control, like .lock.hcl files. To address this, I introduced and educated the team about using .gitignore. We created a common .gitignore file and documented best practices to ensure only necessary files were tracked, improving code cleanliness and reducing merge conflicts.
+**Q: A teammate accidentally pushed a Kubernetes secret—how do you handle it?**  
+1. Remove it in a new commit.  
+2. Use BFG Repo-Cleaner or `git filter-branch` to purge history.  
+3. Rotate the secret immediately.  
+4. Add pre-commit hooks (`git-secrets`, `gitleaks`) and update `.gitignore`.
 
-```
-```
-Question : Explain the recent challange that you faced with git and how did you overcome this challange
-Answer : One of the key Git-related challenges I faced was the lack of access control in our repositories. Initially, all developers had full permissions, including the ability to create branches. This led to unnecessary branch proliferation and caused our CI/CD pipelines to trigger multiple times unnecessarily, which increased infrastructure costs. > > To address this, I proposed and implemented a Role-Based Access Control (RBAC) system. We defined roles such as Reader, Developer, Reviewer, Maintainer, and Administrator. Access permissions were granted based on these roles—only authorized personnel could create or delete branches, and reviewers were assigned to ensure quality checks before merging. This drastically reduced redundant pipeline runs, improved repository governance, and helped optimize costs.
-```
+## 🧠 Advanced
 
-```
-Question : How do you resolve merge conflicts
-Answer : > As a DevOps engineer, if I encounter a merge conflict—especially when two developers have modified the same block of code—I first identify the contributors involved. Since I may not have the full context of the business logic or intended functionality, I reach out to both developers so they can discuss the conflicting changes directly. Once they agree on the correct version of the code, one of them resolves the conflict locally and pushes the updated changes. After that, we proceed with testing to ensure everything works as expected before merging into the main branch.
-```
-```
-Question : Explain about merge strategies
-Answer : > When resolving merge conflicts in Git, two common strategies are ours and theirs. These determine which version of the conflicting code gets preserved. > > - ours strategy: Keeps the changes from the current branch (the one you're on when running the merge), discarding the incoming branch’s changes in the conflict. > - theirs strategy: Does the opposite—it favors the incoming branch’s changes and discards those from the current branch. > > These strategies are particularly useful when you want to override changes in bulk—like during hotfixes or when syncing long-lived branches—without manually resolving each conflict.
-```
+**Q: What is git bisect used for?**  
+A binary-search tool to identify a commit that introduced a bug—marks commits as “good” or “bad”.
 
+**Q: What does git cherry-pick do?**  
+Applies specific commit(s) from one branch to another:  
+```bash
+git cherry-pick <hash>
 ```
-Question : Have you ever used git tags? if yes why?
-Answer : Yes, I’ve used Git tags in my current organization. We primarily use them to mark special commits—especially during manual deployments. For example, once we perform a build or promote a version to another environment, we create a tag on that specific commit. This helps us track exactly which code was deployed where, and makes it easy to refer back or roll back if needed.
-```
+Useful for grabbing bug fixes without merging entire branches.
 
+**Q: How and why do you use git stash?**  
+Temporarily saves uncommitted changes when switching tasks:  
+```bash
+git stash
+git checkout bugfix
+git stash pop
 ```
-Question : How do you combine mutiple commits in a single commit
-Answer : Let’s say I’ve made 10 commits in a feature branch, and I want to combine them into a single commit. I use the command: > git rebase -i HEAD~10 > This opens an interactive editor where I mark the first commit as pick and change the rest to squash or s. After saving, Git prompts me to write a new commit message that represents the combined changes. > > Once the rebase is complete, I use: > git push -f > to force-push the rewritten history to the remote branch.
-```
+Handy for WIP preservation.
 
-```
-Question: Can you tell me 10 Git commands you use on a day-to-day basis?
-Answer : Here are 10 essential Git commands commonly used in day-to-day DevOps workflows:
-- git clone – Downloads a repository from a remote (like GitHub) to your local machine.
-- git add – Stages modified files to be committed.
-- git commit -m "message" – Saves the staged changes with a descriptive message.
-- git pull – Fetches and merges changes from the remote repository to the current branch.
-- git push – Uploads local commits to a remote repository.
-- git status – Displays the current state of the working directory and staging area.
-- git log – Shows the commit history.
-- git merge – Integrates changes from one branch into another.
-- git diff – Shows the differences between file versions.
-- git stash – Temporarily saves changes that are not ready to be committed.
-(Optional Advanced Pick):
-git checkout or git switch – Useful for switching branches or restoring files
-```
+**Q: What is git reflog?**  
+Shows HEAD history (checkouts, commits, rebases)—vital for recovering lost commits.
 
-```
-Question : I want to ignore pushing changes to a file to git, how you can do it
-Answer : To prevent Git from tracking specific files or folders, we use a special file called .gitignore. This file lists the paths that Git should ignore during staging and commits.
-For example, if I don’t want Git to track a .env file that contains sensitive information, I simply add this line to .gitignore
-```
-```
-Question : What is the use of .git folder
-Answer : The .git folder is a hidden directory located at the root of every Git repository. It contains all the metadata and internal data Git needs to manage the project. This includes:
-- Commit history
-- Branches and tags
-- Staging area information
-- Repository configuration settings
-- Hooks and logs
-- The object database, which stores all content as snapshots
-In essence, the .git folder is the brain of the repository—without it, the project is no longer recognized as a Git repo.
-You can think of it like the Terraform state file, which maintains the current state of your infrastructure—similarly, the .git folder maintains the current and historical state of your codebase.
-```
+**Q: What’s the difference between git reset, git revert, and git checkout?**  
+- `git reset`: Changes HEAD and optionally staging/workdir (`--soft`, `--mixed`, `--hard`).  
+- `git revert`: Creates a new commit that undoes changes—keeps history intact.  
+- `git checkout` (or `switch`): Changes branches or restores files, without altering commit history.
 
+## 🧩 Bonus Topics
+
+**Q: Large files**  
+Use Git LFS for binary/large file handling.
+
+**Q: Submodules**  
+Keep external dependencies separate and update via submodule commands.
+
+**Q: Force-push with lease**  
+```bash
+git push --force-with-lease
 ```
-Question : Can you restore a deleted .git folder?
-Answer : If the .git folder of a repository gets deleted, the project is no longer recognized as a Git repository. You can only restore it if:
-- You have a backup of the original .git folder — in that case, simply placing it back in the root restores full Git functionality, including commit history, branches, tags, etc.
-- You have the repository cloned elsewhere or pushed to a remote like GitHub — in this case, you can simply clone the repo again
-However, you’ll lose any local-only commits, staged files, or uncommitted changes that weren’t pushed or backed up elsewhere.
-```
-
-```
-Question : If a teammate accidentally commits a Kubernetes secret to the Git repository how would you tackle this setuation and how will you make sure that it doesn't happen in future
-Answer : If a teammate accidentally commits a Kubernetes secret to the Git repository, I would take the following steps:
-- Immediately remove the secret from the repository with a new commit.
-- Since Git tracks history, I would use a tool like BFG Repo-Cleaner or git filter-branch to permanently remove the secret from the commit history.
-- I’d assume the secret may have been exposed, so I’d ask the development team to rotate the secret immediately to prevent any potential misuse.
-- To prevent similar incidents in the future:
-- Educate the team on best practices for handling secrets.
-- Set up pre-commit hooks (e.g. with tools like git-secrets or gitleaks) to scan for sensitive data before commits.
-- Add sensitive files like secrets.yml or .env to the .gitignore file so they aren’t tracked accidentally.
-```
-
-
-
-
-
+Safer than `--force`—avoids overwriting others’ work.
