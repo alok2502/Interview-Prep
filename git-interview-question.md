@@ -1,4 +1,21 @@
 ```
+Question : What is the difference between git fork and git clone
+Answer : 	• git fork creates a copy of a repository on your GitHub (or GitLab, etc.) account, letting you propose changes without write access to the original repo.
+	• git clone creates a local copy of any Git repository (your own or someone else’s) on your machine for development.
+```
+
+```
+Question : Explain me a scenario where you have used git fork instead of git clone
+Answer :  In my previous project, I didn’t have write access to the main modernization branch. So, I forked the repository to my GitHub account, cloned it locally, and created a feature branch. After making changes, I pushed the branch to my fork and raised a pull request to the original modernization branch. This way, I could contribute without direct access to the main repo.
+```
+
+```
+Question :  Git Fetch vs Git Pull
+Answer : Let's say I cloned a repository in my local machine. Meanwhile, other developers pushed their changes to the remote.
+If I run git fetch, it will download those changes from the remote and store them in my local Git repo’s metadata (inside .git/refs) without affecting my working directory. This lets me review the changes before deciding to merge or rebase. On the other hand, git pull is essentially git fetch followed by a merge (or rebase, depending on the config). It updates both your metadata and your working directory in one step.
+```
+
+```
 Question : What do you prefer generally git fetch vs git pull
 Answer : I generally prefer git pull over git fetch because, in our organization, commits typically trigger a CI/CD pipeline. This pipeline runs automated checks, including vulnerability scans and other validations, which gives us confidence that the incoming code is safe and ready to merge. Since git pull fetches and integrates the changes in one step, it's more streamlined for our day-to-day development.
 ```
